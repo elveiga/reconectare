@@ -26,7 +26,7 @@ const Testimonials = () => {
     (t) => t.name.trim() && t.quote.trim()
   );
 
-  if (!testimonials.length) return null;
+  if (!testimonials.length && !isAdmin) return null;
 
   const handleTestimonialImageUpload = async (idx, event) => {
     const file = event.target.files?.[0];
@@ -84,6 +84,13 @@ const Testimonials = () => {
         </motion.div>
 
         <div className="mt-6">
+          {testimonials.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+              <Quote className="w-10 h-10 mb-3 text-gray-300" />
+              <p className="text-sm font-medium">Nenhum depoimento cadastrado ainda.</p>
+              <p className="text-xs mt-1">Clique em <strong>Editar</strong> para adicionar depoimentos.</p>
+            </div>
+          ) : (
           <div
             className="marquee"
             onMouseEnter={() => setIsPaused(true)}
@@ -130,6 +137,7 @@ const Testimonials = () => {
               ))}
             </div>
           </div>
+          )}
         </div>
         </div>
       </div>
