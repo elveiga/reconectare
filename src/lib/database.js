@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import { getEnvNumber, getEnvString } from './env.js';
 
 // Carregar variáveis de ambiente
-dotenv.config();
+dotenv.config({ quiet: true });
 
 // Configuração da conexão
 const dbConfig = {

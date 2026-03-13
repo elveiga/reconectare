@@ -12,7 +12,7 @@ import { query, queryOne } from '../src/lib/database.js';
 import { getEnvNumber, getEnvString } from '../src/lib/env.js';
 import { ensureDatabaseBootstrap } from './bootstrap-db.js';
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const requireEnv = (name) => {
   const value = getEnvString(name, '');
