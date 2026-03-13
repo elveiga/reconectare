@@ -41,6 +41,10 @@ const Footer = () => {
     clearRuntimeLogo();
   };
 
+  const handleNavClickTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleIconUpload = (event, index) => {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -133,12 +137,12 @@ const Footer = () => {
                     </Link>
                   </li>
                   <li>
-                    <Link to="/anunciar" className="text-sm text-gray-600 hover:text-gray-900 transition-colors md:whitespace-nowrap break-words">
+                    <Link to="/anunciar" onClick={handleNavClickTop} className="text-sm text-gray-600 hover:text-gray-900 transition-colors md:whitespace-nowrap break-words">
                       Anunciar Equipamento
                     </Link>
                   </li>
                   <li>
-                    <Link to="/anuncie-sua-marca" className="text-sm text-gray-600 hover:text-gray-900 transition-colors md:whitespace-nowrap break-words">
+                    <Link to="/anuncie-sua-marca" onClick={handleNavClickTop} className="text-sm text-gray-600 hover:text-gray-900 transition-colors md:whitespace-nowrap break-words">
                       Anuncie sua Marca
                     </Link>
                   </li>

@@ -156,6 +156,10 @@ const PostEquipmentPage = () => {
       return;
     }
 
+    if (!window.confirm('Tem certeza que deseja criar este anuncio?')) {
+      return;
+    }
+
   const typeValue = formData.type === 'Outros' ? formData.otherType : formData.type;
   const brandValue = formData.brand === 'Outros' ? formData.otherBrand : formData.brand;
   const conditionValue = formData.condition;

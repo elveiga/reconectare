@@ -24,7 +24,7 @@ const SiteLogo = ({ customLogo, onCustomLogoError }) => {
           white-space: nowrap;
           line-height: 1;
           font-family: 'Inter','Poppins','Montserrat',sans-serif;
-          font-size: clamp(1.75rem, 5vw, 2.35rem);
+          font-size: clamp(1.45rem, 3.1vw, 2rem);
           font-weight: 600;
           color: #222;
           overflow: hidden;
@@ -32,46 +32,42 @@ const SiteLogo = ({ customLogo, onCustomLogoError }) => {
 
         .logoWordmark > span {
           display: inline-block;
-          opacity: 0;
+          opacity: 1;
         }
 
         .logoWordmark .re {
-          animation: reSlide 0.9s cubic-bezier(.4,0,.2,1) forwards;
+          animation: reSlide 0.65s ease-out both;
         }
 
         .logoWordmark .conect {
           color: #222;
-          animation: conectFade 0.45s 0.55s ease-out forwards,
-            conectHighlight 0.6s 0.95s ease-out forwards;
+          animation: conectFade 0.35s 0.35s ease-out both,
+            conectHighlight 0.45s 0.7s ease-out both;
         }
 
         .logoWordmark .are {
-          animation: areSlide 0.9s cubic-bezier(.4,0,.2,1) forwards;
+          animation: areSlide 0.65s ease-out both;
         }
 
         @keyframes reSlide {
           0% {
             opacity: 0;
-            transform: translateX(-0.9em);
-            filter: blur(5px);
+            transform: translateX(-0.55em);
           }
           100% {
             opacity: 1;
             transform: translateX(0);
-            filter: blur(0);
           }
         }
 
         @keyframes areSlide {
           0% {
             opacity: 0;
-            transform: translateX(0.9em);
-            filter: blur(5px);
+            transform: translateX(0.55em);
           }
           100% {
             opacity: 1;
             transform: translateX(0);
-            filter: blur(0);
           }
         }
 
@@ -90,7 +86,6 @@ const SiteLogo = ({ customLogo, onCustomLogoError }) => {
             animation: none !important;
             opacity: 1;
             transform: none !important;
-            filter: none !important;
           }
           .logoWordmark .conect {
             color: #60a5fa;
