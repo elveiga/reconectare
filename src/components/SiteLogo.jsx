@@ -13,51 +13,99 @@ const SiteLogo = ({ customLogo, onCustomLogoError }) => {
   }
 
   return (
-    <svg
-      className="w-full h-full"
-      viewBox="0 0 600 120"
-      xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label="Reconectare Digital"
-      preserveAspectRatio="xMinYMid meet"
-    >
+    <div className="logoWordmark" role="img" aria-label="Reconectare Digital">
       <style>{`
-        text {
+        .logoWordmark {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          white-space: nowrap;
+          line-height: 1;
           font-family: 'Inter','Poppins','Montserrat',sans-serif;
-          font-size: 64px;
+          font-size: clamp(1.75rem, 5vw, 2.35rem);
           font-weight: 600;
-          dominant-baseline: middle;
+          color: #222;
+          overflow: hidden;
         }
 
-        .wordmark {
-          fill: #222;
+        .logoWordmark > span {
+          display: inline-block;
           opacity: 0;
-          animation: logoFade 0.9s ease-out forwards;
         }
 
-        .conect-highlight {
-          fill: #60a5fa;
-          font-weight: 700;
+        .logoWordmark .re {
+          animation: reSlide 0.9s cubic-bezier(.4,0,.2,1) forwards;
         }
 
-        @keyframes logoFade {
+        .logoWordmark .conect {
+          color: #222;
+          animation: conectFade 0.45s 0.55s ease-out forwards,
+            conectHighlight 0.6s 0.95s ease-out forwards;
+        }
+
+        .logoWordmark .are {
+          animation: areSlide 0.9s cubic-bezier(.4,0,.2,1) forwards;
+        }
+
+        @keyframes reSlide {
           0% {
             opacity: 0;
-            filter: blur(6px);
+            transform: translateX(-0.9em);
+            filter: blur(5px);
           }
           100% {
             opacity: 1;
-            filter: blur(0px);
+            transform: translateX(0);
+            filter: blur(0);
           }
+        }
+
+        @keyframes areSlide {
+          0% {
+            opacity: 0;
+            transform: translateX(0.9em);
+            filter: blur(5px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateX(0);
+            filter: blur(0);
+          }
+        }
+
+        @keyframes conectFade {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+
+        @keyframes conectHighlight {
+          0% { color: #222; }
+          100% { color: #60a5fa; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .logoWordmark > span {
+            animation: none !important;
+            opacity: 1;
+            transform: none !important;
+            filter: none !important;
+          }
+          .logoWordmark .conect {
+            color: #60a5fa;
+          }
+        }
+
+        .logoWordmark .conect {
+          font-weight: 700;
         }
       `}</style>
 
-      <text x="36" y="60" className="wordmark">
-        <tspan>Re</tspan>
-        <tspan className="conect-highlight">conect</tspan>
-        <tspan>are</tspan>
-      </text>
-    </svg>
+      <span className="re">Re</span>
+      <span className="conect">conect</span>
+      <span className="are">are</span>
+    </div>
   );
 };
 
