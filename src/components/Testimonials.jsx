@@ -11,26 +11,40 @@ import FilePicker from '@/components/ui/file-picker';
 const EMPTY_SLOT = (id) => ({ id, name: '', role: '', image: '', quote: '' });
 
 const ensureSlots = (config) => {
-  const slots = [...(config.testimonials || [])];
+  const raw = Array.isArray(config?.testimonials) ? config.testimonials : [];
+  const slots = raw.map((item, idx) => ({
+    id: Number(item?.id) || idx + 1,
+    name: typeof item?.name === 'string' ? item.name : '',
+    role: typeof item?.role === 'string' ? item.role : '',
+    image: typeof item?.image === 'string' ? item.image : '',
+    quote: typeof item?.quote === 'string' ? item.quote : '',
+  }));
   while (slots.length < 5) slots.push(EMPTY_SLOT(slots.length + 1));
-  return { ...config, testimonials: slots.slice(0, 5) };
+  return {
+    title: typeof config?.title === 'string' ? config.title : 'O que nossos clientes dizem?',
+    subtitle: typeof config?.subtitle === 'string'
+      ? config.subtitle
+      : 'Depoimentos de dentistas e clínicas que confiam na Reconectare.',
+    testimonials: slots.slice(0, 5),
+  };
 };
 
 const Testimonials = () => {
   const { testimonialsConfig, updateTestimonialsConfig } = useDataPages();
   const { currentUser } = useUsers();
   const isAdmin = currentUser?.role === 'Admin';
+  const normalizedConfig = ensureSlots(testimonialsConfig);
   const [isEditingTestimonials, setIsEditingTestimonials] = useState(false);
-  const [editingConfig, setEditingConfig] = useState(() => ensureSlots(testimonialsConfig));
+  const [editingConfig, setEditingConfig] = useState(() => normalizedConfig);
   const [uploadingTestimonialIndex, setUploadingTestimonialIndex] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    setEditingConfig(ensureSlots(testimonialsConfig));
-  }, [testimonialsConfig]);
+    setEditingConfig(normalizedConfig);
+  }, [normalizedConfig]);
   
   // Filtrar apenas comentários preenchidos (que têm nome e quote)
-  const testimonials = testimonialsConfig.testimonials.filter(
+  const testimonials = normalizedConfig.testimonials.filter(
     (t) => t.name.trim() && t.quote.trim()
   );
 
@@ -84,10 +98,10 @@ const Testimonials = () => {
           className="text-center mb-10"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            {testimonialsConfig.title}
+            {normalizedConfig.title}
           </h2>
           <p className="text-sm text-gray-600 max-w-2xl mx-auto">
-            {testimonialsConfig.subtitle}
+            {normalizedConfig.subtitle}
           </p>
         </motion.div>
 
@@ -178,7 +192,7 @@ const Testimonials = () => {
 
             <div className="mb-6">
               <label className="block text-sm font-semibold mb-3">Comentários (até 5)</label>
-              {editingConfig.testimonials.map((testimonial, idx) => (
+              {(editingConfig.testimonials || []).map((testimonial, idx) => (
                 <div key={testimonial.id} className="border rounded p-4 mb-4 bg-gray-50">
                   <h4 className="font-semibold mb-3">Comentário {idx + 1}</h4>
 
@@ -257,7 +271,7 @@ const Testimonials = () => {
               </button>
               <button
                 onClick={() => {
-                  setEditingConfig(testimonialsConfig);
+                  setEditingConfig(normalizedConfig);
                   setIsEditingTestimonials(false);
                 }}
                 className="px-4 py-2 border rounded hover:bg-gray-50"
