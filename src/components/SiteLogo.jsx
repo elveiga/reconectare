@@ -16,11 +16,12 @@ const SiteLogo = ({ customLogo, onCustomLogoError }) => {
     <div className="logoWordmark" role="img" aria-label="Reconectare Digital">
       <style>{`
         .logoWordmark {
-          display: inline-flex;
+          width: 100%;
+          height: 100%;
+          display: flex;
           align-items: center;
           justify-content: flex-start;
           white-space: nowrap;
-          overflow: hidden;
           line-height: 1;
           font-family: 'Inter','Poppins','Montserrat',sans-serif;
           font-size: clamp(0.95rem, 1.6vw, 1.25rem);

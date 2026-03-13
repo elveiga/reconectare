@@ -137,7 +137,7 @@ const Header = () => {
           <div ref={logoWrapperRef} className="relative -ml-1 sm:-ml-2">
             <Link to="/" className="flex items-center">
               <div
-                className={`relative w-[160px] sm:w-[220px] h-10 sm:h-12 overflow-hidden rounded-md ${
+                className={`relative w-[160px] sm:w-[220px] h-10 sm:h-12 rounded-md ${
                   isAdmin ? 'border-2 border-blue-400' : ''
                 }`}
               >
