@@ -19,8 +19,27 @@ const dbConfig = {
   keepAliveInitialDelay: 0
 };
 
+const escapeIdentifier = (value) => String(value).replace(/`/g, '``');
+
 // Criar pool de conexões
 const pool = mysql.createPool(dbConfig);
+
+export const ensureDatabaseExists = async () => {
+  if (!dbConfig.database) return;
+
+  const connection = await mysql.createConnection({
+    host: dbConfig.host,
+    port: dbConfig.port,
+    user: dbConfig.user,
+    password: dbConfig.password
+  });
+
+  try {
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${escapeIdentifier(dbConfig.database)}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+  } finally {
+    await connection.end();
+  }
+};
 
 // Função para testar a conexão
 export const testConnection = async () => {

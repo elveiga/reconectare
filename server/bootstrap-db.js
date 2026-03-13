@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { query, queryOne } from '../src/lib/database.js';
+import { ensureDatabaseExists, query, queryOne } from '../src/lib/database.js';
 import { getEnvString } from '../src/lib/env.js';
 
 const DEFAULT_ADMIN_EMAIL = getEnvString('DEFAULT_ADMIN_EMAIL', 'admin@reconectare.com.br');
@@ -347,6 +347,8 @@ const ensureDefaultAdminUser = async () => {
 };
 
 export const ensureDatabaseBootstrap = async () => {
+  await runBootstrapStep('ensure-database-exists', ensureDatabaseExists);
+
   for (const [index, statement] of TABLES_SQL.entries()) {
     await runBootstrapStep(`create-table-${index + 1}`, async () => {
       await query(statement);
