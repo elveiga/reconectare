@@ -44,12 +44,18 @@ const ALLOWED_ORIGINS = IS_PRODUCTION
   : Array.from(new Set([...FRONTEND_ORIGINS, ...DEV_DEFAULT_ORIGINS]));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const UPLOADS_DIR = getEnvString('UPLOADS_DIR', path.resolve(__dirname, '../uploads'));
+const CONFIGURED_UPLOADS_DIR = getEnvString('UPLOADS_DIR', '');
+const UPLOADS_DIR = CONFIGURED_UPLOADS_DIR || path.resolve(__dirname, '../uploads');
+const HAS_PERSISTENT_UPLOADS_CONFIG = Boolean(CONFIGURED_UPLOADS_DIR);
 const DIST_DIR = path.resolve(__dirname, '../dist');
 const DIST_INDEX_FILE = path.join(DIST_DIR, 'index.html');
 
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+if (IS_PRODUCTION && !HAS_PERSISTENT_UPLOADS_CONFIG) {
+  console.warn('UPLOADS_DIR nao configurado em producao. Uploads locais podem sumir apos reinicio/deploy.');
 }
 
 if (!IS_SAME_ORIGIN_MODE) {
@@ -597,6 +603,12 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.post('/api/media/upload', publicMediaRateLimit, authenticateOptional, (req, res) => {
+  if (IS_PRODUCTION && !HAS_PERSISTENT_UPLOADS_CONFIG) {
+    return res.status(503).json({
+      message: 'Uploads persistentes nao configurados. Defina UPLOADS_DIR para um volume persistente no Railway antes de enviar imagens.'
+    });
+  }
+
   mediaUpload.single('file')(req, res, (error) => {
     const cleanupAndReject = async (message) => {
       if (req.file?.path) {

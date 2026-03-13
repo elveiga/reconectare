@@ -18,16 +18,15 @@ const SiteLogo = ({ customLogo, onCustomLogoError }) => {
         .logoWordmark {
           width: 100%;
           height: 100%;
-          display: flex;
+          display: inline-flex;
           align-items: center;
           justify-content: flex-start;
           white-space: nowrap;
           line-height: 1;
           font-family: 'Inter','Poppins','Montserrat',sans-serif;
-          font-size: clamp(1.45rem, 3.1vw, 2rem);
+          font-size: clamp(1.2rem, 2.05vw, 1.65rem);
           font-weight: 600;
           color: #222;
-          overflow: hidden;
         }
 
         .logoWordmark > span {
@@ -36,38 +35,41 @@ const SiteLogo = ({ customLogo, onCustomLogoError }) => {
         }
 
         .logoWordmark .re {
-          animation: reSlide 0.65s ease-out both;
+          margin-right: 0.34em;
+          animation: reJoin 0.55s ease-out forwards;
         }
 
         .logoWordmark .conect {
           color: #222;
-          animation: conectFade 0.35s 0.35s ease-out both,
-            conectHighlight 0.45s 0.7s ease-out both;
+          font-weight: 700;
+          animation: conectFade 0.35s 0.22s ease-out both,
+            conectHighlight 0.45s 0.58s ease-out both;
         }
 
         .logoWordmark .are {
-          animation: areSlide 0.65s ease-out both;
+          margin-left: 0.34em;
+          animation: areJoin 0.55s ease-out forwards;
         }
 
-        @keyframes reSlide {
+        @keyframes reJoin {
           0% {
             opacity: 0;
-            transform: translateX(-0.55em);
+            margin-right: 0.54em;
           }
           100% {
             opacity: 1;
-            transform: translateX(0);
+            margin-right: 0;
           }
         }
 
-        @keyframes areSlide {
+        @keyframes areJoin {
           0% {
             opacity: 0;
-            transform: translateX(0.55em);
+            margin-left: 0.54em;
           }
           100% {
             opacity: 1;
-            transform: translateX(0);
+            margin-left: 0;
           }
         }
 
@@ -85,15 +87,11 @@ const SiteLogo = ({ customLogo, onCustomLogoError }) => {
           .logoWordmark > span {
             animation: none !important;
             opacity: 1;
-            transform: none !important;
+            margin: 0 !important;
           }
           .logoWordmark .conect {
             color: #60a5fa;
           }
-        }
-
-        .logoWordmark .conect {
-          font-weight: 700;
         }
       `}</style>
 
