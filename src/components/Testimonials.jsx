@@ -15,6 +15,7 @@ const Testimonials = () => {
   const [isEditingTestimonials, setIsEditingTestimonials] = useState(false);
   const [editingConfig, setEditingConfig] = useState(testimonialsConfig);
   const [uploadingTestimonialIndex, setUploadingTestimonialIndex] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     setEditingConfig(testimonialsConfig);
@@ -26,8 +27,6 @@ const Testimonials = () => {
   );
 
   if (!testimonials.length) return null;
-
-  const [isPaused, setIsPaused] = useState(false);
 
   const handleTestimonialImageUpload = async (idx, event) => {
     const file = event.target.files?.[0];
