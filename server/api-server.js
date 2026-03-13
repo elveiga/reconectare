@@ -9,12 +9,13 @@ import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { query, queryOne } from '../src/lib/database.js';
+import { getEnvNumber, getEnvString } from '../src/lib/env.js';
 import { ensureDatabaseBootstrap } from './bootstrap-db.js';
 
 dotenv.config();
 
 const requireEnv = (name) => {
-  const value = String(process.env[name] || '').trim();
+  const value = getEnvString(name, '');
   if (!value) {
     throw new Error(`Variavel obrigatoria ausente: ${name}`);
   }
@@ -22,10 +23,10 @@ const requireEnv = (name) => {
 };
 
 const app = express();
-const PORT = Number(process.env.PORT || 5000);
+const PORT = getEnvNumber('PORT', 5000);
 const JWT_SECRET = requireEnv('JWT_SECRET');
-const IS_PRODUCTION = String(process.env.NODE_ENV || '').toLowerCase() === 'production';
-const FRONTEND_ORIGINS = String(process.env.FRONTEND_ORIGINS || '')
+const IS_PRODUCTION = getEnvString('NODE_ENV', '').toLowerCase() === 'production';
+const FRONTEND_ORIGINS = getEnvString('FRONTEND_ORIGINS', '')
   .split(',')
   .map((item) => item.trim())
   .filter(Boolean);
@@ -67,13 +68,13 @@ if (!IS_SAME_ORIGIN_MODE) {
 app.use(express.json({ limit: '2mb' }));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
-const LOGIN_WINDOW_MS = Number(process.env.LOGIN_WINDOW_MS || 15 * 60 * 1000);
-const LOGIN_MAX_ATTEMPTS_PER_IP = Number(process.env.LOGIN_MAX_ATTEMPTS_PER_IP || 20);
+const LOGIN_WINDOW_MS = getEnvNumber('LOGIN_WINDOW_MS', 15 * 60 * 1000);
+const LOGIN_MAX_ATTEMPTS_PER_IP = getEnvNumber('LOGIN_MAX_ATTEMPTS_PER_IP', 20);
 const LOGIN_PROGRESSIVE_LOCK_SECONDS = [0, 0, 0, 30, 60, 180, 600, 1800];
-const PUBLIC_ACTION_WINDOW_MS = Number(process.env.PUBLIC_ACTION_WINDOW_MS || 15 * 60 * 1000);
-const PUBLIC_MEDIA_UPLOAD_MAX_PER_IP = Number(process.env.PUBLIC_MEDIA_UPLOAD_MAX_PER_IP || 40);
-const PUBLIC_LISTING_CREATE_MAX_PER_IP = Number(process.env.PUBLIC_LISTING_CREATE_MAX_PER_IP || 8);
-const AUTO_APPROVE_NEW_LISTINGS = String(process.env.AUTO_APPROVE_NEW_LISTINGS || 'true').toLowerCase() !== 'false';
+const PUBLIC_ACTION_WINDOW_MS = getEnvNumber('PUBLIC_ACTION_WINDOW_MS', 15 * 60 * 1000);
+const PUBLIC_MEDIA_UPLOAD_MAX_PER_IP = getEnvNumber('PUBLIC_MEDIA_UPLOAD_MAX_PER_IP', 40);
+const PUBLIC_LISTING_CREATE_MAX_PER_IP = getEnvNumber('PUBLIC_LISTING_CREATE_MAX_PER_IP', 8);
+const AUTO_APPROVE_NEW_LISTINGS = getEnvString('AUTO_APPROVE_NEW_LISTINGS', 'true').toLowerCase() !== 'false';
 
 // Rate limiting state has been moved to database (login_attempts table)
 // See database/db-add-login-tracking.sql for schema

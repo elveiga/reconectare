@@ -1,11 +1,12 @@
 import bcrypt from 'bcryptjs';
 import { query, queryOne } from '../src/lib/database.js';
+import { getEnvString } from '../src/lib/env.js';
 
-const DEFAULT_ADMIN_EMAIL = process.env.DEFAULT_ADMIN_EMAIL || 'admin@reconectare.com.br';
-const DEFAULT_ADMIN_PASSWORD = process.env.DEFAULT_ADMIN_PASSWORD || '';
-const DEFAULT_ADMIN_NAME = process.env.DEFAULT_ADMIN_NAME || 'Administrador Reconectare';
-const DEFAULT_ADMIN_PHONE = process.env.DEFAULT_ADMIN_PHONE || '5511999999999';
-const DEFAULT_ADMIN_CPF = process.env.DEFAULT_ADMIN_CPF || '99999999999';
+const DEFAULT_ADMIN_EMAIL = getEnvString('DEFAULT_ADMIN_EMAIL', 'admin@reconectare.com.br');
+const DEFAULT_ADMIN_PASSWORD = getEnvString('DEFAULT_ADMIN_PASSWORD', '');
+const DEFAULT_ADMIN_NAME = getEnvString('DEFAULT_ADMIN_NAME', 'Administrador Reconectare');
+const DEFAULT_ADMIN_PHONE = getEnvString('DEFAULT_ADMIN_PHONE', '5511999999999');
+const DEFAULT_ADMIN_CPF = getEnvString('DEFAULT_ADMIN_CPF', '99999999999');
 
 const TABLES_SQL = [
   `CREATE TABLE IF NOT EXISTS users (
