@@ -16,81 +16,58 @@ const SiteLogo = ({ customLogo, onCustomLogoError }) => {
     <div className="logoWordmark" role="img" aria-label="Reconectare Digital">
       <style>{`
         .logoWordmark {
-          width: 100%;
-          height: 100%;
           display: inline-flex;
           align-items: center;
           justify-content: flex-start;
           white-space: nowrap;
+          overflow: hidden;
           line-height: 1;
           font-family: 'Inter','Poppins','Montserrat',sans-serif;
-          font-size: clamp(1.2rem, 2.05vw, 1.65rem);
+          font-size: clamp(0.95rem, 1.6vw, 1.25rem);
           font-weight: 600;
           color: #222;
         }
 
         .logoWordmark > span {
           display: inline-block;
-          opacity: 1;
         }
 
         .logoWordmark .re {
-          margin-right: 0.34em;
-          animation: reJoin 0.55s ease-out forwards;
+          animation: logoSlideLeft 0.5s ease-out both;
         }
 
         .logoWordmark .conect {
-          color: #222;
+          color: #60a5fa;
           font-weight: 700;
-          animation: conectFade 0.35s 0.22s ease-out both,
-            conectHighlight 0.45s 0.58s ease-out both;
+          animation: logoFadeIn 0.4s 0.25s ease-out both;
         }
 
         .logoWordmark .are {
-          margin-left: 0.34em;
-          animation: areJoin 0.55s ease-out forwards;
+          animation: logoSlideRight 0.5s ease-out both;
         }
 
-        @keyframes reJoin {
-          0% {
-            opacity: 0;
-            margin-right: 0.54em;
-          }
-          100% {
-            opacity: 1;
-            margin-right: 0;
-          }
+        @keyframes logoSlideLeft {
+          from { opacity: 0; transform: translateX(-0.5em); }
+          to   { opacity: 1; transform: translateX(0); }
         }
 
-        @keyframes areJoin {
-          0% {
-            opacity: 0;
-            margin-left: 0.54em;
-          }
-          100% {
-            opacity: 1;
-            margin-left: 0;
-          }
+        @keyframes logoSlideRight {
+          from { opacity: 0; transform: translateX(0.5em); }
+          to   { opacity: 1; transform: translateX(0); }
         }
 
-        @keyframes conectFade {
-          0% { opacity: 0; }
-          100% { opacity: 1; }
-        }
-
-        @keyframes conectHighlight {
-          0% { color: #222; }
-          100% { color: #60a5fa; }
+        @keyframes logoFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .logoWordmark > span {
-            animation: none !important;
-            opacity: 1;
-            margin: 0 !important;
-          }
+          .logoWordmark .re,
+          .logoWordmark .are,
           .logoWordmark .conect {
-            color: #60a5fa;
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
           }
         }
       `}</style>
