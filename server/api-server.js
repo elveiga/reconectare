@@ -44,7 +44,7 @@ const ALLOWED_ORIGINS = IS_PRODUCTION
   : Array.from(new Set([...FRONTEND_ORIGINS, ...DEV_DEFAULT_ORIGINS]));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const UPLOADS_DIR = path.resolve(__dirname, '../uploads');
+const UPLOADS_DIR = getEnvString('UPLOADS_DIR', path.resolve(__dirname, '../uploads'));
 const DIST_DIR = path.resolve(__dirname, '../dist');
 const DIST_INDEX_FILE = path.join(DIST_DIR, 'index.html');
 

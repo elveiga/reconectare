@@ -280,7 +280,7 @@ const seedReferenceData = async () => {
     await query(
       `INSERT INTO page_config (config_key, config_value)
        VALUES (?, ?)
-       ON DUPLICATE KEY UPDATE config_value = VALUES(config_value)`,
+       ON DUPLICATE KEY UPDATE config_key = config_key`,
       [key, JSON.stringify(value)]
     );
   }
