@@ -8,17 +8,25 @@ import { uploadMediaRequest } from '@/services/mediaApi';
 import { getRuntimeToken } from '@/lib/authSession';
 import FilePicker from '@/components/ui/file-picker';
 
+const EMPTY_SLOT = (id) => ({ id, name: '', role: '', image: '', quote: '' });
+
+const ensureSlots = (config) => {
+  const slots = [...(config.testimonials || [])];
+  while (slots.length < 5) slots.push(EMPTY_SLOT(slots.length + 1));
+  return { ...config, testimonials: slots.slice(0, 5) };
+};
+
 const Testimonials = () => {
   const { testimonialsConfig, updateTestimonialsConfig } = useDataPages();
   const { currentUser } = useUsers();
   const isAdmin = currentUser?.role === 'Admin';
   const [isEditingTestimonials, setIsEditingTestimonials] = useState(false);
-  const [editingConfig, setEditingConfig] = useState(testimonialsConfig);
+  const [editingConfig, setEditingConfig] = useState(() => ensureSlots(testimonialsConfig));
   const [uploadingTestimonialIndex, setUploadingTestimonialIndex] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    setEditingConfig(testimonialsConfig);
+    setEditingConfig(ensureSlots(testimonialsConfig));
   }, [testimonialsConfig]);
   
   // Filtrar apenas comentários preenchidos (que têm nome e quote)
