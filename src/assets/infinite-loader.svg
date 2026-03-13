@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32" width="128" height="64" aria-hidden="true">
+  <style>
+  /* double visual size (width/height) but keep original stroke thickness */
+  .stroke { fill: none; stroke: #111827; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .bg { fill: none; stroke: #e5e7eb; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+    /* longer dash to slow visual movement */
+    .dash { stroke-dasharray: 120; stroke-dashoffset: 120; animation: dash 3.2s linear infinite; }
+    .dash-reverse { stroke-dasharray: 120; stroke-dashoffset: -120; animation: dash-rev 3.2s linear infinite; }
+    @keyframes dash {
+      0% { stroke-dashoffset: 120; }
+      50% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -120; }
+    }
+    @keyframes dash-rev {
+      0% { stroke-dashoffset: -120; }
+      50% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: 120; }
+    }
+    .pulse { transform-origin: 32px 16px; animation: pulse 3s ease-in-out infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+  </style>
+
+  <!-- background faint infinity shape (static, horizontal) -->
+  <g class="pulse" opacity="0.9">
+    <path class="bg" d="M12 16c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8S12 20.418 12 16z" transform="translate(4,0) scale(0.9)"/>
+    <path class="bg" d="M52 16c0-4.418-3.582-8-8-8s-8 3.582-8 8 3.582 8 8 8 8-3.582 8-8z" transform="translate(-4,0) scale(0.9)"/>
+  </g>
+
+  <!-- animated stroke that gives the loading effect (horizontal infinity) -->
+  <g class="pulse" opacity="1">
+    <path class="stroke dash" d="M12 16c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8S12 20.418 12 16z" transform="translate(4,0) scale(0.9)"/>
+    <path class="stroke dash-reverse" d="M52 16c0-4.418-3.582-8-8-8s-8 3.582-8 8 3.582 8 8 8 8-3.582 8-8z" transform="translate(-4,0) scale(0.9)"/>
+  </g>
+</svg>

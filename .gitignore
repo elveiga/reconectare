@@ -1,0 +1,37 @@
+# Dependências
+node_modules/
+yarn.lock
+
+# Arquivos de ambiente (NÃO versionar!)
+.env
+.env.local
+.env.development
+.env.production
+database/.env
+database/.env.local
+database/.env.production
+
+# Build
+dist/
+build/
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporários
+*.tmp
+*.temp
+database/tmp-*.mjs
+
+# Uploads gerados em runtime
+uploads/*
+!uploads/banner1.jpg

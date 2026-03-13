@@ -1,0 +1,28 @@
+stages:
+  - lint
+  - build
+
+default:
+  image: node:20
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+
+before_script:
+  - npm ci
+
+lint:
+  stage: lint
+  script:
+    - npm run lint
+
+build:
+  stage: build
+  script:
+    - npm run build
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - dist/

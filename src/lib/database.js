@@ -1,0 +1,76 @@
+import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
+
+// Carregar variáveis de ambiente
+dotenv.config();
+
+// Configuração da conexão
+const dbConfig = {
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '3306'),
+  user: process.env.DB_USER || 'reconectare_app',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'reconectarehtml',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
+};
+
+// Criar pool de conexões
+const pool = mysql.createPool(dbConfig);
+
+// Função para testar a conexão
+export const testConnection = async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log('✅ Conexão com MySQL estabelecida com sucesso!');
+    connection.release();
+    return true;
+  } catch (error) {
+    console.error('❌ Erro ao conectar com MySQL:', error.message);
+    return false;
+  }
+};
+
+// Função helper para executar queries
+export const query = async (sql, params = []) => {
+  try {
+    const [rows] = await pool.execute(sql, params);
+    return rows;
+  } catch (error) {
+    console.error('❌ Erro ao executar query:', error.message);
+    throw error;
+  }
+};
+
+// Função helper para executar queries que retornam um único resultado
+export const queryOne = async (sql, params = []) => {
+  try {
+    const [rows] = await pool.execute(sql, params);
+    return rows[0] || null;
+  } catch (error) {
+    console.error('❌ Erro ao executar query:', error.message);
+    throw error;
+  }
+};
+
+// Função para iniciar uma transação
+export const transaction = async (callback) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const result = await callback(connection);
+    await connection.commit();
+    return result;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
+// Exportar o pool para uso direto quando necessário
+export default pool;
