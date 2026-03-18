@@ -439,11 +439,11 @@ INSERT INTO page_config (config_key, config_value, description) VALUES
  'Configuração do rodapé'),
 
 ('advertise_whatsapp', 
- '{"buttonText": "Falar com consultor sobre planos", "whatsappNumber": "5511953821255"}',
+ '{"buttonText": "Falar com consultor sobre planos", "whatsappNumber": "5511913474725"}',
  'Configuração do botão WhatsApp da página Anunciar'),
 
 ('post_equipment_whatsapp', 
- '{"buttonText": "Enviar para Análise", "whatsappNumber": "5511953821255"}',
+ '{"buttonText": "Enviar para Análise", "whatsappNumber": "5511913474725"}',
  'Configuração do botão WhatsApp da página Anunciar Equipamento'),
 
 ('testimonials_header', 

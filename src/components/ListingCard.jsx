@@ -34,7 +34,7 @@ const ListingCard = ({
   const handleWhatsAppClick = (e) => {
     e.stopPropagation();
     window.open(
-      `https://wa.me/5511953821255?text=Tenho%20interesse%20no%20anúncio:%20${encodeURIComponent(
+      `https://wa.me/5511913474725?text=Tenho%20interesse%20no%20anúncio:%20${encodeURIComponent(
         listing.name
       )}`,
       '_blank'

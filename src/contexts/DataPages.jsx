@@ -213,12 +213,12 @@ export const DataPagesProvider = ({ children }) => {
 
   const [advertiseWhatsAppConfig, setAdvertiseWhatsAppConfig] = useState({
       buttonText: 'Falar com consultor sobre planos',
-      whatsappNumber: '5511953821255'
+      whatsappNumber: '5511913474725'
   });
 
   const [postEquipmentWhatsAppConfig, setPostEquipmentWhatsAppConfig] = useState({
     buttonText: 'Enviar para Análise',
-    whatsappNumber: '5511953821255'
+    whatsappNumber: '5511913474725'
   });
 
   const [adBannersConfig, setAdBannersConfig] = useState({
