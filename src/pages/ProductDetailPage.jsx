@@ -36,6 +36,7 @@ const ProductDetailPage = () => {
   const [zoomLevel, setZoomLevel] = useState(0); // 0 = normal, 1 = 1.5x, 2 = 2.5x
   const [touchStart, setTouchStart] = useState(null);
   const [pinchDistance, setPinchDistance] = useState(null);
+  const [zoomOrigin, setZoomOrigin] = useState('center');
 
   if (!listing) {
     return (
@@ -76,7 +77,7 @@ const ProductDetailPage = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
-
+            {/* Seta Esquerda */}
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent(
       `Olá, tenho interesse no equipamento ${listing.name} - ${listing.code}`
@@ -152,6 +153,44 @@ const ProductDetailPage = () => {
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
+      if (newDistance > pinchDistance + 10) {
+        setZoomLevel(2);
+      } else if (newDistance < pinchDistance - 10) {
+        setZoomLevel(0);
+      }
+    }
+  };
+
+  const handleImageClick = (e) => {
+    const img = e.currentTarget;
+    const rect = img.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomOrigin(`${Math.max(0, Math.min(100, x))}% ${Math.max(0, Math.min(100, y))}%`);
+    setZoomLevel((prev) => (prev === 2 ? 0 : prev + 1));
+  };
+
+  const calculatePinchOrigin = (touches) => {
+    if (touches.length !== 2) return 'center';
+    const img = document.querySelector('.lightbox-image');
+    if (!img) return 'center';
+    const rect = img.getBoundingClientRect();
+    const centerX = (touches[0].clientX + touches[1].clientX) / 2;
+    const centerY = (touches[0].clientY + touches[1].clientY) / 2;
+    const x = ((centerX - rect.left) / rect.width) * 100;
+    const y = ((centerY - rect.top) / rect.height) * 100;
+    return `${Math.max(0, Math.min(100, x))}% ${Math.max(0, Math.min(100, y))}%`;
+  };
+
+  const handleTouchMoveWithOrigin = (e) => {
+    if (e.touches.length === 2 && pinchDistance) {
+      e.preventDefault();
+      const newDistance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const origin = calculatePinchOrigin(e.touches);
+      setZoomOrigin(origin);
       if (newDistance > pinchDistance + 10) {
         setZoomLevel(2);
       } else if (newDistance < pinchDistance - 10) {
@@ -395,20 +434,21 @@ const ProductDetailPage = () => {
             onClick={(e) => e.stopPropagation()}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
-            onTouchMove={handleTouchMove}
-            className="relative flex items-center justify-center flex-1 w-full max-w-4xl"
+            onTouchMove={handleTouchMoveWithOrigin}
+            style={{ touchAction: 'none' }}
+              className="relative flex items-center justify-center flex-1 w-full max-w-4xl lightbox-image"
           >
             {/* Imagem com zoom */}
             <motion.img
               src={currentImage}
               alt={listing.name}
-              onClick={handleCycleZoom}
-              className={`max-w-full max-h-[70vh] object-contain transition-transform duration-300 ${
+              onClick={handleImageClick}
+              className={`lightbox-image max-w-full max-h-[70vh] object-contain transition-transform duration-300 ${
                 zoomLevel > 0 ? 'cursor-zoom-out' : 'cursor-zoom-in'
               }`}
               style={{
                 scale: getZoomScale(),
-                transformOrigin: 'center'
+                transformOrigin: zoomOrigin
               }}
             />
 
