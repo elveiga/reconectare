@@ -33,7 +33,9 @@ const ProductDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [imageError, setImageError] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxZoom, setLightboxZoom] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(0); // 0 = normal, 1 = 1.5x, 2 = 2.5x
+  const [touchStart, setTouchStart] = useState(null);
+  const [pinchDistance, setPinchDistance] = useState(null);
 
   if (!listing) {
     return (
@@ -94,6 +96,68 @@ const ProductDetailPage = () => {
   const handleNextImage = () => {
     setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
     setImageError(false);
+  };
+
+  const handleCycleZoom = () => {
+    setZoomLevel((prev) => (prev === 2 ? 0 : prev + 1));
+  };
+
+  const getZoomScale = () => {
+    switch (zoomLevel) {
+      case 1:
+        return 1.5;
+      case 2:
+        return 2.5;
+      default:
+        return 1;
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      setTouchStart(e.touches[0].clientX);
+    }
+    if (e.touches.length === 2) {
+      const distance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      setPinchDistance(distance);
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStart || e.changedTouches.length !== 1) {
+      setTouchStart(null);
+      return;
+    }
+
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        handleNextImage();
+      } else {
+        handlePreviousImage();
+      }
+    }
+
+    setTouchStart(null);
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2 && pinchDistance) {
+      const newDistance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      if (newDistance > pinchDistance + 10) {
+        setZoomLevel(2);
+      } else if (newDistance < pinchDistance - 10) {
+        setZoomLevel(0);
+      }
+    }
   };
 
   const currentImage =
@@ -315,7 +379,7 @@ const ProductDetailPage = () => {
             if (e.key === 'ArrowRight') handleNextImage();
           }}
           tabIndex={0}
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-4"
         >
           <button
             onClick={(e) => {
@@ -329,17 +393,21 @@ const ProductDetailPage = () => {
 
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-4xl max-h-[90vh] flex items-center justify-center"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onTouchMove={handleTouchMove}
+            className="relative flex items-center justify-center flex-1 w-full max-w-4xl"
           >
             {/* Imagem com zoom */}
             <motion.img
               src={currentImage}
               alt={listing.name}
-              onMouseEnter={() => setLightboxZoom(true)}
-              onMouseLeave={() => setLightboxZoom(false)}
-              className="max-w-full max-h-[80vh] object-contain transition-transform duration-300"
+              onClick={handleCycleZoom}
+              className={`max-w-full max-h-[70vh] object-contain transition-transform duration-300 ${
+                zoomLevel > 0 ? 'cursor-zoom-out' : 'cursor-zoom-in'
+              }`}
               style={{
-                scale: lightboxZoom ? 1.3 : 1,
+                scale: getZoomScale(),
                 transformOrigin: 'center'
               }}
             />
@@ -369,14 +437,14 @@ const ProductDetailPage = () => {
                 <ChevronRight className="w-6 h-6" />
               </button>
             )}
-
-            {/* Contador */}
-            {images.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
-                {selectedImage + 1} de {images.length}
-              </div>
-            )}
           </div>
+
+          {/* Contador - Bem abaixo da imagem */}
+          {images.length > 1 && (
+            <div className="mt-6 bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
+              {selectedImage + 1} de {images.length}
+            </div>
+          )}
         </motion.div>
       )}
     </>
