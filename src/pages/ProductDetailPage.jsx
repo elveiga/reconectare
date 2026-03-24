@@ -193,7 +193,7 @@ const ProductDetailPage = () => {
               {/* DESCRIÇÃO */}
               <div className="bg-gray-50 rounded-lg p-5 mb-6">
                 <h2 className="text-lg font-bold mb-3">Descrição</h2>
-                <p className="text-sm text-gray-700 leading-relaxed">
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {listing.description}
                 </p>
               </div>
