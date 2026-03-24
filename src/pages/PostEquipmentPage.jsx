@@ -515,19 +515,6 @@ const PostEquipmentPage = () => {
                     </select>
                   </div>
                 </div>
-
-                {/* Descrição */}
-                <div>
-                  <label className="block text-xs uppercase tracking-wide text-gray-600 mb-2 font-medium">Descrição</label>
-                  <textarea
-                    name="description"
-                    placeholder="Descreva o equipamento: estado, funcionalidades, histórico, etc."
-                    value={formData.description}
-                    onChange={handleChange}
-                    rows={6}
-                    className={`w-full border ${errors.description ? 'border-red-300' : 'border-gray-200'} rounded-md px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-gray-400 transition-colors resize-vertical`}
-                  />
-                </div>
               </div>
             </div>
 
