@@ -62,7 +62,7 @@ const ListingCard = ({
               decoding="async"
               onError={() => setImageError(true)}
               onLoad={() => setImageLoaded(true)}
-              className={`w-full h-full object-contain p-2 transition-opacity duration-300 ${
+              className={`w-full h-full object-cover scale-[0.94] transition-opacity duration-300 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
             />
