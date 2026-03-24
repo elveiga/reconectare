@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Award } from 'lucide-react';
@@ -15,6 +15,18 @@ const ListingCard = ({
   const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const containerRef = useRef(null);
+  const [portraitTransform, setPortraitTransform] = useState(null);
+
+  const handleImageLoad = (e) => {
+    const img = e.currentTarget;
+    if (img.naturalHeight > img.naturalWidth * 1.2 && containerRef.current) {
+      const W = containerRef.current.offsetWidth;
+      const H = containerRef.current.offsetHeight;
+      setPortraitTransform({ W, H });
+    }
+    setImageLoaded(true);
+  };
 
   const hasImage = listing.image && !imageError;
 
@@ -51,7 +63,7 @@ const ListingCard = ({
       className={`bg-white rounded-lg shadow-sm hover:shadow-md cursor-pointer overflow-hidden w-full ${cardHeight} flex flex-col`}
     >
       {/* IMAGEM / FALLBACK */}
-      <div className="relative h-[65%] flex items-center justify-center bg-gradient-to-t from-gray-100 to-white overflow-hidden">
+      <div ref={containerRef} className="relative h-[65%] flex items-center justify-center bg-gradient-to-t from-gray-100 to-white overflow-hidden">
 
         {hasImage ? (
           <>
@@ -61,10 +73,17 @@ const ListingCard = ({
               loading="lazy"
               decoding="async"
               onError={() => setImageError(true)}
-              onLoad={() => setImageLoaded(true)}
-              className={`w-full h-full object-cover scale-[0.94] transition-opacity duration-300 ${
+              onLoad={handleImageLoad}
+              className={`transition-opacity duration-300 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+              } ${portraitTransform ? 'absolute object-cover' : 'w-full h-full object-cover'}`}
+              style={portraitTransform ? {
+                width: `${portraitTransform.H}px`,
+                height: `${portraitTransform.W}px`,
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%) rotate(90deg)',
+              } : undefined}
             />
             {!imageLoaded && (
               <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
@@ -94,7 +113,7 @@ const ListingCard = ({
         )}
 
         {/* PREÇO */}
-        <div className="absolute bottom-1 left-2 text-sm font-bold text-white drop-shadow">
+        <div className="absolute bottom-1 left-2 text-sm font-bold text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.9),0_0_8px_rgba(0,0,0,0.6)]">
           R$ {listing.price.toLocaleString('pt-BR')}
         </div>
 
