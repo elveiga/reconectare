@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useData } from '@/contexts/DataContext';
-import { MapPin, ArrowLeft } from 'lucide-react';
+import { MapPin, ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import ListingCard from '@/components/ListingCard';
 
 const FALLBACK_IMAGE =
@@ -23,6 +23,17 @@ const ProductDetailPage = () => {
     }
   }, [code]);
 
+  // Fechar lightbox com ESC
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setLightboxOpen(false);
+      if (e.key === 'ArrowLeft' && lightboxOpen) goToPreviousImage();
+      if (e.key === 'ArrowRight' && lightboxOpen) goToNextImage();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxOpen, selectedImage]);
+
 
   const listing = listings.find((l) => l.code === code);
 
@@ -32,6 +43,8 @@ const ProductDetailPage = () => {
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [imageError, setImageError] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxZoom, setLightboxZoom] = useState(false);
 
   if (!listing) {
     return (
@@ -84,6 +97,16 @@ const ProductDetailPage = () => {
     );
   };
 
+  const goToPreviousImage = () => {
+    setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    setImageError(false);
+  };
+
+  const goToNextImage = () => {
+    setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    setImageError(false);
+  };
+
   const currentImage =
     imageError || !images[selectedImage]
       ? FALLBACK_IMAGE
@@ -118,12 +141,19 @@ const ProductDetailPage = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="bg-white rounded-xl overflow-hidden shadow-md mb-3 relative">
+              <div className="bg-white rounded-xl overflow-hidden shadow-md mb-3 relative cursor-pointer group">
+                <button
+                  onClick={() => setLightboxOpen(true)}
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-black/30 transition-opacity z-10 flex items-center justify-center"
+                >
+                  <span className="text-white text-sm font-semibold">Clique para ampliar</span>
+                </button>
 
                 <img
                   src={currentImage}
                   alt={listing.name}
                   onError={() => setImageError(true)}
+                  onClick={() => setLightboxOpen(true)}
                   className={`w-full aspect-[4/3] object-contain bg-gradient-to-b from-gray-50 to-white p-2 ${
                     usingFallback ? 'opacity-0' : ''
                   }`}
@@ -193,7 +223,7 @@ const ProductDetailPage = () => {
               {/* DESCRIÇÃO */}
               <div className="bg-gray-50 rounded-lg p-5 mb-6">
                 <h2 className="text-lg font-bold mb-3">Descrição</h2>
-                <p className="text-sm text-gray-700 leading-relaxed">
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {listing.description}
                 </p>
               </div>
@@ -280,6 +310,78 @@ const ProductDetailPage = () => {
           )}
         </div>
       </div>
+
+      {/* LIGHTBOX MODAL */}
+      {lightboxOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setLightboxOpen(false)}
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxOpen(false);
+            }}
+            className="absolute top-4 right-4 text-white hover:text-gray-300 z-60"
+          >
+            <X className="w-8 h-8" />
+          </button>
+
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-4xl max-h-[90vh] flex items-center justify-center"
+          >
+            {/* Imagem com zoom */}
+            <motion.img
+              src={currentImage}
+              alt={listing.name}
+              onMouseEnter={() => setLightboxZoom(true)}
+              onMouseLeave={() => setLightboxZoom(false)}
+              className="max-w-full max-h-[80vh] object-contain cursor-zoom-in sm:cursor-zoom-out transition-transform duration-300"
+              style={{
+                scale: lightboxZoom ? 1.3 : 1,
+                transformOrigin: 'center'
+              }}
+            />
+
+            {/* Navegação - Seta Esquerda */}
+            {images.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToPreviousImage();
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition-colors"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+            )}
+
+            {/* Navegação - Seta Direita */}
+            {images.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToNextImage();
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition-colors"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            )}
+
+            {/* Contador de imagens */}
+            {images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
+                {selectedImage + 1} de {images.length}
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
     </>
   );
 };
