@@ -37,6 +37,9 @@ const ProductDetailPage = () => {
   const [touchStart, setTouchStart] = useState(null);
   const [pinchDistance, setPinchDistance] = useState(null);
   const [zoomOrigin, setZoomOrigin] = useState('center');
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState(null);
+  const [didDrag, setDidDrag] = useState(false);
 
   if (!listing) {
     return (
@@ -89,14 +92,35 @@ const ProductDetailPage = () => {
     );
   };
 
+  const resetZoomState = () => {
+    setZoomLevel(0);
+    setZoomOrigin('center');
+    setPanOffset({ x: 0, y: 0 });
+    setPinchDistance(null);
+    setTouchStart(null);
+    setDragStart(null);
+    setDidDrag(false);
+  };
+
+  const handleCloseLightbox = (e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    resetZoomState();
+    setLightboxOpen(false);
+  };
+
   const handlePreviousImage = () => {
     setSelectedImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
     setImageError(false);
+    resetZoomState();
   };
 
   const handleNextImage = () => {
     setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
     setImageError(false);
+    resetZoomState();
   };
 
   const handleCycleZoom = () => {
@@ -116,7 +140,18 @@ const ProductDetailPage = () => {
 
   const handleTouchStart = (e) => {
     if (e.touches.length === 1) {
-      setTouchStart(e.touches[0].clientX);
+      if (zoomLevel > 0) {
+        setDragStart({
+          type: 'touch',
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+          panX: panOffset.x,
+          panY: panOffset.y
+        });
+        setTouchStart(null);
+      } else {
+        setTouchStart(e.touches[0].clientX);
+      }
     }
     if (e.touches.length === 2) {
       const distance = Math.hypot(
@@ -124,10 +159,22 @@ const ProductDetailPage = () => {
         e.touches[0].clientY - e.touches[1].clientY
       );
       setPinchDistance(distance);
+      setDragStart(null);
     }
   };
 
   const handleTouchEnd = (e) => {
+    if (dragStart?.type === 'touch') {
+      setDragStart(null);
+      setTouchStart(null);
+      return;
+    }
+
+    if (zoomLevel > 0) {
+      setTouchStart(null);
+      return;
+    }
+
     if (!touchStart || e.changedTouches.length !== 1) {
       setTouchStart(null);
       return;
@@ -162,12 +209,26 @@ const ProductDetailPage = () => {
   };
 
   const handleImageClick = (e) => {
+    if (didDrag) {
+      setDidDrag(false);
+      return;
+    }
+
     const img = e.currentTarget;
     const rect = img.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setZoomOrigin(`${Math.max(0, Math.min(100, x))}% ${Math.max(0, Math.min(100, y))}%`);
-    setZoomLevel((prev) => (prev === 2 ? 0 : prev + 1));
+    const nextZoom = zoomLevel === 2 ? 0 : zoomLevel + 1;
+
+    if (nextZoom === 0) {
+      resetZoomState();
+      return;
+    }
+
+    setZoomOrigin(
+      `${Math.max(0, Math.min(100, x))}% ${Math.max(0, Math.min(100, y))}%`
+    );
+    setZoomLevel(nextZoom);
   };
 
   const calculatePinchOrigin = (touches) => {
@@ -183,6 +244,17 @@ const ProductDetailPage = () => {
   };
 
   const handleTouchMoveWithOrigin = (e) => {
+    if (e.touches.length === 1 && zoomLevel > 0 && dragStart?.type === 'touch') {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - dragStart.x;
+      const dy = e.touches[0].clientY - dragStart.y;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        setDidDrag(true);
+      }
+      setPanOffset({ x: dragStart.panX + dx, y: dragStart.panY + dy });
+      return;
+    }
+
     if (e.touches.length === 2 && pinchDistance) {
       e.preventDefault();
       const newDistance = Math.hypot(
@@ -194,8 +266,36 @@ const ProductDetailPage = () => {
       if (newDistance > pinchDistance + 10) {
         setZoomLevel(2);
       } else if (newDistance < pinchDistance - 10) {
-        setZoomLevel(0);
+        resetZoomState();
       }
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    if (zoomLevel === 0) return;
+    e.preventDefault();
+    setDragStart({
+      type: 'mouse',
+      x: e.clientX,
+      y: e.clientY,
+      panX: panOffset.x,
+      panY: panOffset.y
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!dragStart || dragStart.type !== 'mouse') return;
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      setDidDrag(true);
+    }
+    setPanOffset({ x: dragStart.panX + dx, y: dragStart.panY + dy });
+  };
+
+  const handleMouseUp = () => {
+    if (dragStart?.type === 'mouse') {
+      setDragStart(null);
     }
   };
 
@@ -271,6 +371,7 @@ const ProductDetailPage = () => {
                       onClick={() => {
                         setSelectedImage(idx);
                         setImageError(false);
+                        resetZoomState();
                       }}
                       className={`rounded border overflow-hidden ${selectedImage === idx ? 'border-gray-900' : 'border-gray-200'}`}
                     >
@@ -411,9 +512,9 @@ const ProductDetailPage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={() => setLightboxOpen(false)}
+          onClick={handleCloseLightbox}
           onKeyDown={(e) => {
-            if (e.key === 'Escape') setLightboxOpen(false);
+            if (e.key === 'Escape') handleCloseLightbox();
             if (e.key === 'ArrowLeft') handlePreviousImage();
             if (e.key === 'ArrowRight') handleNextImage();
           }}
@@ -421,11 +522,10 @@ const ProductDetailPage = () => {
           className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-4"
         >
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setLightboxOpen(false);
-            }}
-            className="absolute top-4 right-4 text-white hover:text-gray-300 z-60"
+            type="button"
+            onClick={handleCloseLightbox}
+            onTouchEnd={handleCloseLightbox}
+            className="absolute top-3 right-3 text-white hover:text-gray-300 z-[70] p-2"
           >
             <X className="w-8 h-8" />
           </button>
@@ -443,11 +543,15 @@ const ProductDetailPage = () => {
               src={currentImage}
               alt={listing.name}
               onClick={handleImageClick}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
               className={`lightbox-image max-w-full max-h-[70vh] object-contain transition-transform duration-300 ${
                 zoomLevel > 0 ? 'cursor-zoom-out' : 'cursor-zoom-in'
               }`}
               style={{
-                scale: getZoomScale(),
+                transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${getZoomScale()})`,
                 transformOrigin: zoomOrigin
               }}
             />
