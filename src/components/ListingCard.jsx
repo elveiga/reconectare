@@ -51,7 +51,7 @@ const ListingCard = ({
       className={`bg-white rounded-lg shadow-sm hover:shadow-md cursor-pointer overflow-hidden w-full ${cardHeight} flex flex-col`}
     >
       {/* IMAGEM / FALLBACK */}
-      <div className="relative h-[65%] flex items-center justify-center bg-gradient-to-t from-gray-200 to-white overflow-hidden">
+      <div className="relative h-[65%] flex items-center justify-center bg-gradient-to-t from-gray-100 to-white overflow-hidden">
 
         {hasImage ? (
           <>
@@ -62,7 +62,7 @@ const ListingCard = ({
               decoding="async"
               onError={() => setImageError(true)}
               onLoad={() => setImageLoaded(true)}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
+              className={`w-full h-full object-contain p-2 transition-opacity duration-300 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
             />

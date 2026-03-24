@@ -124,7 +124,7 @@ const ProductDetailPage = () => {
                   src={currentImage}
                   alt={listing.name}
                   onError={() => setImageError(true)}
-                  className={`w-full aspect-[4/3] object-cover ${
+                  className={`w-full aspect-[4/3] object-contain bg-gradient-to-b from-gray-50 to-white p-2 ${
                     usingFallback ? 'opacity-0' : ''
                   }`}
                 />
@@ -150,7 +150,7 @@ const ProductDetailPage = () => {
                       }}
                       className={`rounded border overflow-hidden ${selectedImage === idx ? 'border-gray-900' : 'border-gray-200'}`}
                     >
-                      <img src={img} alt={`Miniatura ${idx + 1}`} className="w-full h-16 object-cover" />
+                      <img src={img} alt={`Miniatura ${idx + 1}`} className="w-full h-16 object-contain bg-gray-50 p-1" />
                     </button>
                   ))}
                 </div>
