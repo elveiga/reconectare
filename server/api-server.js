@@ -80,7 +80,7 @@ const LOGIN_PROGRESSIVE_LOCK_SECONDS = [0, 0, 0, 30, 60, 180, 600, 1800];
 const PUBLIC_ACTION_WINDOW_MS = getEnvNumber('PUBLIC_ACTION_WINDOW_MS', 15 * 60 * 1000);
 const PUBLIC_MEDIA_UPLOAD_MAX_PER_IP = getEnvNumber('PUBLIC_MEDIA_UPLOAD_MAX_PER_IP', 40);
 const PUBLIC_LISTING_CREATE_MAX_PER_IP = getEnvNumber('PUBLIC_LISTING_CREATE_MAX_PER_IP', 8);
-const AUTO_APPROVE_NEW_LISTINGS = getEnvString('AUTO_APPROVE_NEW_LISTINGS', 'true').toLowerCase() !== 'false';
+const AUTO_APPROVE_NEW_LISTINGS = getEnvString('AUTO_APPROVE_NEW_LISTINGS', 'false').toLowerCase() === 'true';
 
 // Rate limiting state has been moved to database (login_attempts table)
 // See database/db-add-login-tracking.sql for schema
@@ -1021,10 +1021,15 @@ app.post('/api/listings', publicListingRateLimit, authenticateOptional, async (r
       return res.status(400).json({ message: 'WhatsApp do anunciante inválido' });
     }
 
-    const defaultNewStatus = AUTO_APPROVE_NEW_LISTINGS ? 'Disponível' : 'Pendente';
-    const listingStatus = req.user ? (ALLOWED_STATUS.includes(payload.status) ? payload.status : defaultNewStatus) : defaultNewStatus;
-    const isPremiumValue = req.user ? (payload.isPremium ? 1 : 0) : 0;
-    const soldDate = listingStatus === 'Vendido' ? (payload.soldDate || new Date().toISOString().slice(0, 10)) : null;
+    const isAdminRequest = req.user?.role === 'Admin';
+    const defaultNewStatus = isAdminRequest && AUTO_APPROVE_NEW_LISTINGS ? 'Disponível' : 'Pendente';
+    const listingStatus = isAdminRequest && ALLOWED_STATUS.includes(payload.status)
+      ? payload.status
+      : defaultNewStatus;
+    const isPremiumValue = isAdminRequest ? (payload.isPremium ? 1 : 0) : 0;
+    const soldDate = listingStatus === 'Vendido'
+      ? (payload.soldDate || new Date().toISOString().slice(0, 10))
+      : null;
     const mediaPayload = buildListingSpecsWithMedia({
       incomingSpecs: payload.specs,
       currentSpecsRaw: null,
@@ -1075,7 +1080,7 @@ app.post('/api/listings', publicListingRateLimit, authenticateOptional, async (r
   }
 });
 
-app.put('/api/listings/:id', authenticate, async (req, res) => {
+app.put('/api/listings/:id', authenticate, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const current = await queryOne('SELECT * FROM listings WHERE id = ?', [id]);
@@ -1130,7 +1135,7 @@ app.put('/api/listings/:id', authenticate, async (req, res) => {
   }
 });
 
-app.patch('/api/listings/:id/status', authenticate, async (req, res) => {
+app.patch('/api/listings/:id/status', authenticate, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const status = req.body?.status;
