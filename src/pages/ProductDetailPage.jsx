@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useData } from '@/contexts/DataContext';
-import { MapPin, ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { MapPin, ArrowLeft, ChevronLeft, ChevronRight, X, Share2 } from 'lucide-react';
 import ListingCard from '@/components/ListingCard';
 
 const FALLBACK_IMAGE =
@@ -90,6 +90,34 @@ const ProductDetailPage = () => {
       `https://wa.me/${listing.seller.whatsapp}?text=${message}`,
       '_blank'
     );
+  };
+
+  const handleShareClick = async () => {
+    const url = window.location.href;
+    const shareData = {
+      title: `${listing.name} - Reconectare`,
+      text: `Confira este equipamento: ${listing.name}`,
+      url
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      await navigator.clipboard.writeText(url);
+      window.alert('Link copiado para compartilhar.');
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
+
+      try {
+        await navigator.clipboard.writeText(url);
+        window.alert('Link copiado para compartilhar.');
+      } catch (_copyError) {
+        window.prompt('Copie o link para compartilhar:', url);
+      }
+    }
   };
 
   const resetZoomState = () => {
@@ -471,17 +499,29 @@ const ProductDetailPage = () => {
                 </dl>
               </div>
 
-              {listing.status === 'Disponível' && (
+              <div className="space-y-3">
+                {listing.status === 'Disponível' && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleWhatsAppClick}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold shadow-md inline-flex items-center justify-center gap-2"
+                  >
+                    <img src="/WhatsApplogo.svg" alt="WhatsApp" className="w-4 h-4" />
+                    Falar no WhatsApp
+                  </motion.button>
+                )}
+
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={handleWhatsAppClick}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold shadow-md inline-flex items-center justify-center gap-2"
+                  onClick={handleShareClick}
+                  className="w-full bg-gray-900 hover:bg-black text-white py-3 rounded-lg font-semibold shadow-md inline-flex items-center justify-center gap-2"
                 >
-                  <img src="/WhatsApplogo.svg" alt="WhatsApp" className="w-4 h-4" />
-                  Falar no WhatsApp
+                  <Share2 className="w-4 h-4" />
+                  Compartilhar
                 </motion.button>
-              )}
+              </div>
             </motion.div>
           </div>
 
