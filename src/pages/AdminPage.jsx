@@ -8,6 +8,7 @@ import { useUsers } from '@/contexts/DataUser';
 import { uploadMediaRequest } from '@/services/mediaApi';
 import { getRuntimeToken } from '@/lib/authSession';
 import FilePicker from '@/components/ui/file-picker';
+import ProductImageManager from '@/components/ProductImageManager';
 
 const formatBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0);
 const onlyDigits = (s) => String(s || '').replace(/\D/g, '');
@@ -495,6 +496,46 @@ const AdminPage = () => {
     return result.url;
   };
 
+  const updateTargetProductForm = (targetForm, updater) => {
+    const setter = targetForm === 'edit' ? setEditForm : setCreateForm;
+    setter((prev) => {
+      if (!prev) return prev;
+      return typeof updater === 'function' ? updater(prev) : updater;
+    });
+  };
+
+  const applyProductImages = (targetForm, nextImages) => {
+    updateTargetProductForm(targetForm, (prev) => ({
+      ...prev,
+      images: nextImages,
+      image: nextImages[0] || ''
+    }));
+  };
+
+  const handleProductImagesChange = (targetForm, nextImages) => {
+    applyProductImages(targetForm, nextImages.slice(0, 9));
+  };
+
+  const handleReplaceProductImage = async (targetForm, index, file) => {
+    setUploadingProductMedia(true);
+    try {
+      const imageUrl = await uploadMedia(file);
+      updateTargetProductForm(targetForm, (prev) => {
+        const nextImages = [...(prev.images || [])];
+        nextImages[index] = imageUrl;
+        return {
+          ...prev,
+          images: nextImages,
+          image: nextImages[0] || ''
+        };
+      });
+    } catch (error) {
+      throw error;
+    } finally {
+      setUploadingProductMedia(false);
+    }
+  };
+
   const handleBannerImageUpload = async (idx, event) => {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -549,7 +590,7 @@ const AdminPage = () => {
         }
 
         if (targetForm === 'edit') {
-          setEditForm((prev) => {
+          updateTargetProductForm('edit', (prev) => {
             const nextImages = [...(prev?.images || []), ...uploaded].slice(0, 9);
             return {
               ...prev,
@@ -558,7 +599,7 @@ const AdminPage = () => {
             };
           });
         } else {
-          setCreateForm((prev) => {
+          updateTargetProductForm('create', (prev) => {
             const nextImages = [...(prev.images || []), ...uploaded].slice(0, 9);
             return {
               ...prev,
@@ -1595,27 +1636,12 @@ const AdminPage = () => {
                   emptyLabel="Nenhum arquivo selecionado"
                 />
                 <p className="text-[11px] text-gray-500 mt-1">{uploadingProductMedia ? 'Enviando mídias...' : 'Selecione uma ou mais imagens.'}</p>
-                {(editForm.images || []).length > 0 && (
-                  <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {(editForm.images || []).map((imgUrl, idx) => (
-                      <div key={`${imgUrl}-${idx}`} className="relative">
-                        <img src={imgUrl} alt={`Imagem ${idx + 1}`} className="w-full h-20 object-cover rounded border" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditForm((prev) => {
-                              const nextImages = (prev.images || []).filter((_, i) => i !== idx);
-                              return { ...prev, images: nextImages, image: nextImages[0] || '' };
-                            });
-                          }}
-                          className="absolute top-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded"
-                        >
-                          Remover
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <ProductImageManager
+                  images={editForm.images || []}
+                  onChange={(nextImages) => handleProductImagesChange('edit', nextImages)}
+                  onReplaceImage={(index, file) => handleReplaceProductImage('edit', index, file)}
+                  disabled={uploadingProductMedia}
+                />
               </div>
               <div className="col-span-full">
                 <label className="block text-xs uppercase tracking-wide text-gray-600 mb-2 font-medium">Vídeo do Produto (opcional)</label>
@@ -1828,27 +1854,12 @@ const AdminPage = () => {
                   emptyLabel="Nenhum arquivo selecionado"
                 />
                 <p className="text-[11px] text-gray-500 mt-1">{uploadingProductMedia ? 'Enviando mídias...' : 'Selecione uma ou mais imagens.'}</p>
-                {(createForm.images || []).length > 0 && (
-                  <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {(createForm.images || []).map((imgUrl, idx) => (
-                      <div key={`${imgUrl}-${idx}`} className="relative">
-                        <img src={imgUrl} alt={`Imagem ${idx + 1}`} className="w-full h-20 object-cover rounded border" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setCreateForm((prev) => {
-                              const nextImages = (prev.images || []).filter((_, i) => i !== idx);
-                              return { ...prev, images: nextImages, image: nextImages[0] || '' };
-                            });
-                          }}
-                          className="absolute top-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded"
-                        >
-                          Remover
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <ProductImageManager
+                  images={createForm.images || []}
+                  onChange={(nextImages) => handleProductImagesChange('create', nextImages)}
+                  onReplaceImage={(index, file) => handleReplaceProductImage('create', index, file)}
+                  disabled={uploadingProductMedia}
+                />
               </div>
               <div className="col-span-full">
                 <label className="block text-xs uppercase tracking-wide text-gray-600 mb-2 font-medium">Vídeo do Produto (opcional)</label>
