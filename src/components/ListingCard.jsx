@@ -7,7 +7,7 @@ import { shareListing } from '@/lib/listingShare';
 // using project root WhatsApp logo placed at /WhatsApplogo.svg
 
 const FALLBACK_TEXT = 'Imagem disponível em breve…';
-const SLIDE_INTERVAL_MS = 1300; // ms between auto-slides on hover
+const SLIDE_INTERVAL_MS = 2000; // ms between auto-slides on hover
 const MAX_FREE_SLIDES = 3;      // after this many steps blur overlay appears
 
 const ListingCard = ({
