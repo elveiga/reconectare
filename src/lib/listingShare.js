@@ -31,6 +31,16 @@ const getPrimaryImageUrl = (listing) => {
   return listing?.image || '';
 };
 
+const getAbsoluteUrl = (src) => new URL(src, window.location.origin).toString();
+
+const fetchAsBlob = async (src) => {
+  const response = await fetch(getAbsoluteUrl(src), { mode: 'cors', credentials: 'omit' });
+  if (!response.ok) {
+    throw new Error('Nao foi possivel baixar a imagem para compartilhamento.');
+  }
+  return response.blob();
+};
+
 const loadImage = (src) => new Promise((resolve, reject) => {
   const image = new Image();
   image.crossOrigin = 'anonymous';
@@ -38,6 +48,23 @@ const loadImage = (src) => new Promise((resolve, reject) => {
   image.onerror = () => reject(new Error('Nao foi possivel carregar uma das imagens do compartilhamento.'));
   image.src = src;
 });
+
+const loadBlobImage = (blob) => {
+  const objectUrl = URL.createObjectURL(blob);
+
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Nao foi possivel carregar a imagem temporaria do compartilhamento.'));
+    };
+    image.src = objectUrl;
+  });
+};
 
 const getLogoSource = () => {
   const runtimeLogo = getRuntimeLogo();
@@ -62,10 +89,14 @@ const drawRoundedRect = (context, x, y, width, height, radius) => {
 };
 
 const createWatermarkedBlob = async (imageUrl) => {
-  const absoluteUrl = new URL(imageUrl, window.location.origin).toString();
+  const [baseImageBlob, logoBlob] = await Promise.all([
+    fetchAsBlob(imageUrl),
+    fetchAsBlob(getLogoSource())
+  ]);
+
   const [baseImage, logoImage] = await Promise.all([
-    loadImage(absoluteUrl),
-    loadImage(getLogoSource())
+    loadBlobImage(baseImageBlob),
+    loadBlobImage(logoBlob)
   ]);
 
   const canvas = document.createElement('canvas');
@@ -118,6 +149,25 @@ const createWatermarkedBlob = async (imageUrl) => {
   });
 };
 
+const createOriginalImageFile = async (listing) => {
+  const imageUrl = getPrimaryImageUrl(listing);
+  if (!imageUrl) return null;
+
+  const blob = await fetchAsBlob(imageUrl);
+  const mimeType = blob.type || 'image/jpeg';
+  const extension = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
+  const fileName = `${listing?.code || 'anuncio'}.${extension}`;
+  return new File([blob], fileName, { type: mimeType });
+};
+
+const canShareFiles = (files) => {
+  return Array.isArray(files)
+    && files.length > 0
+    && typeof navigator !== 'undefined'
+    && typeof navigator.canShare === 'function'
+    && navigator.canShare({ files });
+};
+
 export const buildListingUrl = (listing) => {
   const baseUrl = window.location.origin;
   if (listing?.code) {
@@ -142,12 +192,25 @@ const createShareFile = async (listing) => {
   const imageUrl = getPrimaryImageUrl(listing);
   if (!imageUrl) return null;
 
-  const blob = await createWatermarkedBlob(imageUrl);
-  const fileName = `${listing?.code || 'anuncio'}.jpg`;
-  const file = new File([blob], fileName, { type: 'image/jpeg' });
+  try {
+    const blob = await createWatermarkedBlob(imageUrl);
+    const fileName = `${listing?.code || 'anuncio'}.jpg`;
+    const file = new File([blob], fileName, { type: 'image/jpeg' });
 
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    return [file];
+    if (canShareFiles([file])) {
+      return [file];
+    }
+  } catch (_error) {
+    // Falls back below to the original image if watermark composition fails.
+  }
+
+  try {
+    const originalFile = await createOriginalImageFile(listing);
+    if (originalFile && canShareFiles([originalFile])) {
+      return [originalFile];
+    }
+  } catch (_error) {
+    // Text-only share continues below when file sharing is unavailable.
   }
 
   return null;
@@ -160,12 +223,7 @@ export const shareListing = async (listing) => {
 
   try {
     if (navigator.share) {
-      let files;
-      try {
-        files = await createShareFile(listing);
-      } catch (_error) {
-        files = null;
-      }
+      const files = await createShareFile(listing).catch(() => null);
 
       const shareData = files?.length
         ? { title, text, files }
