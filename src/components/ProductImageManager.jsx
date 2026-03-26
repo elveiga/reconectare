@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Cropper from 'react-easy-crop';
 import {
   DndContext,
@@ -20,6 +21,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { getCroppedImageFile } from '@/lib/cropImage';
 
 const buildItemId = (imageUrl, index) => `${index}::${imageUrl}`;
+
+const canUseDOM = typeof document !== 'undefined';
 
 function SortableImageCard({ id, imageUrl, index, onEdit, onRemove }) {
   const {
@@ -66,7 +69,7 @@ function SortableImageCard({ id, imageUrl, index, onEdit, onRemove }) {
       <button
         type="button"
         onClick={() => onEdit(index)}
-        className="absolute bottom-1 left-1 inline-flex items-center gap-1 rounded bg-white/90 px-2 py-1 text-[10px] font-medium text-gray-900 hover:bg-white"
+        className="absolute bottom-7 right-1 inline-flex items-center gap-1 rounded bg-white/90 px-2 py-1 text-[10px] font-medium text-gray-900 hover:bg-white"
       >
         <Crop className="h-3 w-3" />
         Recortar
@@ -200,9 +203,9 @@ export default function ProductImageManager({
         </DndContext>
       )}
 
-      {cropModalIndex !== null && images[cropModalIndex] && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
+      {canUseDOM && cropModalIndex !== null && images[cropModalIndex] && createPortal(
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b px-5 py-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Recortar imagem</h3>
@@ -276,7 +279,8 @@ export default function ProductImageManager({
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
