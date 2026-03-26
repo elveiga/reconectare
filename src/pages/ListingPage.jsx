@@ -137,6 +137,7 @@ const ListingPage = () => {
                     compact
                     inlineWhatsapp
                     showWhatsapp
+                    showShare
                   />
                 </motion.div>
               ))}

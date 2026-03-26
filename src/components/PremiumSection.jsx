@@ -61,6 +61,7 @@ const PremiumSection = () => {
               compact
               inlineWhatsapp
               showWhatsapp
+              showShare
             />
           ))}
         </div>

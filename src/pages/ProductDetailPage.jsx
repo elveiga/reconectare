@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { useData } from '@/contexts/DataContext';
 import { MapPin, ArrowLeft, ChevronLeft, ChevronRight, X, Share2 } from 'lucide-react';
 import ListingCard from '@/components/ListingCard';
+import { useToast } from '@/components/ui/use-toast';
+import { shareListing } from '@/lib/listingShare';
 
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&q=80';
@@ -13,6 +15,7 @@ const ProductDetailPage = () => {
   const { code } = useParams();
   const navigate = useNavigate();
   const { listings } = useData();
+  const { toast } = useToast();
 
   // Garantir que, ao abrir um detalhe de produto, a página role para o topo
   useEffect(() => {
@@ -93,30 +96,20 @@ const ProductDetailPage = () => {
   };
 
   const handleShareClick = async () => {
-    const url = window.location.href;
-    const shareData = {
-      title: `${listing.name} - Reconectare`,
-      text: `Confira este equipamento: ${listing.name}`,
-      url
-    };
+    const result = await shareListing(listing);
 
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return;
-      }
+    if (result.status === 'copied') {
+      toast({
+        title: 'Conteudo copiado',
+        description: 'A mensagem do anuncio foi copiada para compartilhar.'
+      });
+    }
 
-      await navigator.clipboard.writeText(url);
-      window.alert('Link copiado para compartilhar.');
-    } catch (error) {
-      if (error?.name === 'AbortError') return;
-
-      try {
-        await navigator.clipboard.writeText(url);
-        window.alert('Link copiado para compartilhar.');
-      } catch (_copyError) {
-        window.prompt('Copie o link para compartilhar:', url);
-      }
+    if (result.status === 'prompted') {
+      toast({
+        title: 'Compartilhamento manual',
+        description: 'Se necessario, copie o texto exibido para compartilhar.'
+      });
     }
   };
 

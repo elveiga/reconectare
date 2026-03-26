@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Award } from 'lucide-react';
+import { Award, Share2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { shareListing } from '@/lib/listingShare';
 // using project root WhatsApp logo placed at /WhatsApplogo.svg
 
 const FALLBACK_TEXT = 'Imagem disponível em breve…';
@@ -11,8 +13,10 @@ const ListingCard = ({
   compact = false,
   showWhatsapp = true,
   inlineWhatsapp = false,
+  showShare = false,
 }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const containerRef = useRef(null);
@@ -51,6 +55,25 @@ const ListingCard = ({
       )}`,
       '_blank'
     );
+  };
+
+  const handleShareClick = async (e) => {
+    e.stopPropagation();
+    const result = await shareListing(listing);
+
+    if (result.status === 'copied') {
+      toast({
+        title: 'Conteudo copiado',
+        description: 'A mensagem do anuncio foi copiada para compartilhar.'
+      });
+    }
+
+    if (result.status === 'prompted') {
+      toast({
+        title: 'Compartilhamento manual',
+        description: 'Se necessario, copie o texto exibido para compartilhar.'
+      });
+    }
   };
 
   const cardHeight = compact ? 'h-[190px]' : 'h-[300px]';
@@ -132,15 +155,27 @@ const ListingCard = ({
             {listing.name}
           </h3>
 
-          {inlineWhatsapp && showWhatsapp && (
-            <button
-              onClick={handleWhatsAppClick}
-              aria-label="Abrir WhatsApp"
-              className="bg-green-500 hover:bg-green-600 p-1.5 rounded-full shadow-sm"
-            >
-              <img src="/WhatsApplogo.svg" alt="WhatsApp" className="w-3.5 h-3.5" />
-            </button>
-          )}
+          <div className="flex items-center gap-1">
+            {showShare && (
+              <button
+                onClick={handleShareClick}
+                aria-label="Compartilhar anuncio"
+                className="bg-gray-900 hover:bg-black p-1.5 rounded-full shadow-sm text-white"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {inlineWhatsapp && showWhatsapp && (
+              <button
+                onClick={handleWhatsAppClick}
+                aria-label="Abrir WhatsApp"
+                className="bg-green-500 hover:bg-green-600 p-1.5 rounded-full shadow-sm"
+              >
+                <img src="/WhatsApplogo.svg" alt="WhatsApp" className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* MARCA */}
@@ -150,15 +185,27 @@ const ListingCard = ({
           </span>
         )}
 
-        {!inlineWhatsapp && showWhatsapp && (
-          <div className="mt-auto flex justify-end">
-            <button
-              onClick={handleWhatsAppClick}
-              aria-label="Abrir WhatsApp"
-              className="bg-green-500 hover:bg-green-600 p-2 rounded-full shadow-md"
-            >
-              <img src="/WhatsApplogo.svg" alt="WhatsApp" className="w-4 h-4" />
-            </button>
+        {(!inlineWhatsapp && (showWhatsapp || showShare)) && (
+          <div className="mt-auto flex justify-end gap-2">
+            {showShare && (
+              <button
+                onClick={handleShareClick}
+                aria-label="Compartilhar anuncio"
+                className="bg-gray-900 hover:bg-black p-2 rounded-full shadow-md text-white"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+            )}
+
+            {showWhatsapp && (
+              <button
+                onClick={handleWhatsAppClick}
+                aria-label="Abrir WhatsApp"
+                className="bg-green-500 hover:bg-green-600 p-2 rounded-full shadow-md"
+              >
+                <img src="/WhatsApplogo.svg" alt="WhatsApp" className="w-4 h-4" />
+              </button>
+            )}
           </div>
         )}
       </div>
