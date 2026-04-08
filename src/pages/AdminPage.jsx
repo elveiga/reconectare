@@ -1445,17 +1445,30 @@ const AdminPage = () => {
                           {banner.imageUrl && (
                             <div className="mt-2">
                               <p className="text-xs text-gray-600 mb-1">Prévia:</p>
-                              <div className="border rounded p-2 bg-white inline-block">
-                                <img 
-                                  src={banner.imageUrl} 
-                                  alt="Prévia do banner" 
-                                  className="max-w-xs max-h-32 object-contain"
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'block';
+                              <div className="flex items-start gap-3">
+                                <div className="border rounded p-2 bg-white inline-block flex-shrink-0">
+                                  <img
+                                    src={banner.imageUrl}
+                                    alt="Prévia do banner"
+                                    className="max-w-xs max-h-32 object-contain"
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      e.target.nextSibling.style.display = 'block';
+                                    }}
+                                  />
+                                  <p className="text-xs text-red-500" style={{display: 'none'}}>Erro ao carregar imagem</p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newBanners = [...bannersEditing.banners];
+                                    newBanners[idx] = { ...newBanners[idx], imageUrl: '' };
+                                    setBannersEditing((s) => ({ ...s, banners: newBanners }));
                                   }}
-                                />
-                                <p className="text-xs text-red-500" style={{display: 'none'}}>Erro ao carregar imagem</p>
+                                  className="text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1 hover:bg-red-50 whitespace-nowrap mt-1"
+                                >
+                                  ✕ Remover
+                                </button>
                               </div>
                             </div>
                           )}

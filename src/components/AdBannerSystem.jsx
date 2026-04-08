@@ -142,22 +142,21 @@ const AdBannerSystem = ({ bannerId, position }) => {
       if (!currentSlot) return null;
 
       return (
-        <div className="relative w-full h-[190px] rounded-lg overflow-hidden bg-gray-100">
+        <div className="relative w-full rounded-lg overflow-hidden bg-gray-100">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
-              initial={{ x: 300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="absolute inset-0"
             >
               {currentSlot.linkUrl ? (
-                <a href={currentSlot.linkUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                <a href={currentSlot.linkUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
                   {currentSlot.mediaType === 'video' ? (
                     <video
                       src={currentSlot.mediaUrl}
-                      className="w-full h-full object-cover"
+                      className="w-full h-auto"
                       autoPlay
                       muted
                       loop
@@ -166,7 +165,7 @@ const AdBannerSystem = ({ bannerId, position }) => {
                     <img
                       src={currentSlot.mediaUrl}
                       alt={`Anúncio ${currentSlide + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-auto"
                     />
                   )}
                 </a>
@@ -175,7 +174,7 @@ const AdBannerSystem = ({ bannerId, position }) => {
                   {currentSlot.mediaType === 'video' ? (
                     <video
                       src={currentSlot.mediaUrl}
-                      className="w-full h-full object-cover"
+                      className="w-full h-auto"
                       autoPlay
                       muted
                       loop
@@ -184,7 +183,7 @@ const AdBannerSystem = ({ bannerId, position }) => {
                     <img
                       src={currentSlot.mediaUrl}
                       alt={`Anúncio ${currentSlide + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-auto"
                     />
                   )}
                 </>
@@ -201,13 +200,13 @@ const AdBannerSystem = ({ bannerId, position }) => {
     return (
       <div className={`grid gap-4 ${banner.layout === 1 ? 'grid-cols-1' : banner.layout === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3'}`}>
         {slotsToShow.map((slot, idx) => (
-          <div key={slot.id || idx} className="w-full h-[190px] rounded-lg overflow-hidden bg-gray-100">
+          <div key={slot.id || idx} className="w-full rounded-lg overflow-hidden bg-gray-100">
             {slot.linkUrl ? (
-              <a href={slot.linkUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+              <a href={slot.linkUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
                 {slot.mediaType === 'video' ? (
                   <video
                     src={slot.mediaUrl}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto"
                     autoPlay
                     muted
                     loop
@@ -216,7 +215,7 @@ const AdBannerSystem = ({ bannerId, position }) => {
                   <img
                     src={slot.mediaUrl}
                     alt={`Anúncio ${idx + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto"
                   />
                 )}
               </a>
@@ -225,7 +224,7 @@ const AdBannerSystem = ({ bannerId, position }) => {
                 {slot.mediaType === 'video' ? (
                   <video
                     src={slot.mediaUrl}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto"
                     autoPlay
                     muted
                     loop
@@ -234,7 +233,7 @@ const AdBannerSystem = ({ bannerId, position }) => {
                   <img
                     src={slot.mediaUrl}
                     alt={`Anúncio ${idx + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto"
                   />
                 )}
               </>
@@ -287,7 +286,7 @@ const AdBannerSystem = ({ bannerId, position }) => {
 
             <h3 className="text-lg font-bold mb-2">Editar Banner - {position}</h3>
             <div className="text-xs text-gray-500 mb-4">
-              Dimensões recomendadas: Largura 1280px × Altura 190px (proporção 6.7:1)
+              Use a largura real da imagem (ex.: 1216px × 100px) — altura livre, máx. 500px
             </div>
 
             {/* Enabled Toggle */}
@@ -407,7 +406,25 @@ const AdBannerSystem = ({ bannerId, position }) => {
                         {uploadingSlotIndex === idx ? 'Enviando arquivo...' : (slot.mediaUrl ? 'Arquivo enviado com sucesso.' : 'Nenhum arquivo enviado.')}
                       </p>
                       {slot.mediaUrl && (
-                        <p className="text-[11px] text-gray-500 break-all mt-1">{slot.mediaUrl}</p>
+                        <div className="mt-2 space-y-2">
+                          {slot.mediaType !== 'video' && (
+                            <img src={slot.mediaUrl} alt="Prévia" className="max-w-full max-h-20 object-contain rounded border bg-white" />
+                          )}
+                          <div className="flex items-center gap-2">
+                            <p className="text-[11px] text-gray-500 break-all flex-1">{slot.mediaUrl}</p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newSlots = [...(editing.slots || [])];
+                                newSlots[idx] = { ...newSlots[idx], mediaUrl: '' };
+                                setEditing({ ...editing, slots: newSlots });
+                              }}
+                              className="flex-shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1 hover:bg-red-50 whitespace-nowrap"
+                            >
+                              ✕ Remover
+                            </button>
+                          </div>
+                        </div>
                       )}
                     </div>
 

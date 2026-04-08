@@ -137,7 +137,24 @@ const HomePage = () => {
                       {uploadingBannerIndex === idx ? 'Enviando imagem...' : (banner.imageUrl ? 'Imagem enviada com sucesso.' : 'Nenhuma imagem enviada ainda.')}
                     </p>
                     {banner.imageUrl && (
-                      <img src={banner.imageUrl} alt={`Prévia ${banner.name}`} className="mt-2 w-full max-w-xs h-24 object-cover rounded border" />
+                      <div className="mt-2 flex items-start gap-3">
+                        <img
+                          src={banner.imageUrl}
+                          alt={`Prévia ${banner.name}`}
+                          className="w-full max-w-xs h-auto max-h-32 object-contain rounded border bg-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = [...bannersEditing.banners];
+                            next[idx] = { ...next[idx], imageUrl: '' };
+                            setBannersEditing((s) => ({ ...s, banners: next }));
+                          }}
+                          className="flex-shrink-0 text-xs text-red-500 hover:text-red-700 border border-red-200 rounded px-2 py-1 hover:bg-red-50 whitespace-nowrap mt-1"
+                        >
+                          ✕ Remover
+                        </button>
+                      </div>
                     )}
                   </div>
 
